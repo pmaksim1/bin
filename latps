@@ -1,0 +1,12 @@
+#!/bin/csh -f
+
+set name = $argv[1]
+pslatex ${name}.tex
+if ($status) exit
+
+
+#--- dvips -Ppdf produces funny characters for "fi" and "fl" unless
+#--- switch -G0 is present as well!
+#
+dvips -Ppdf -G0 -t letter ${name}.dvi -o ${name}.ps 
+

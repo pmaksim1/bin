@@ -1,0 +1,51 @@
+#!/bin/csh -f
+
+if ($#argv == 0) then
+    echo "Usage: lprheps <filename>  <extra-switches-to-lp>"
+    exit 2
+endif
+
+set fname = $argv[1]
+shift argv
+
+
+#--- Convert to pdf if necessary
+set ext  = $fname:e
+set base = $fname:r
+set psfile = "none"
+if ($ext == "pdf") then
+    # run pdftops
+    # &&& To-do: test if pstopdf exists, otherwise try pdf2ps
+    #
+    set psfile = /var/tmp/${base}.ps
+    echo "Converting $fname to $psfile"
+    pdftops $fname $psfile
+    set fname = $psfile
+endif
+
+set h = `funame`
+if (($h == "heps") || ($h == "pollux") || ($h == "castor")) then
+    @ weAreOnHeps = 1
+else
+    @ weAreOnHeps = 0
+endif
+
+if ($weAreOnHeps) then
+    #--- Just print and exit
+    echo "Printing $fname"
+    lp -oduplex $argv[*] $fname
+else
+    #--- Copy to heps
+    echo "Copying $fname to heps and printing it there"
+    set hdest = lprheps_$$
+    scp $fname heps:/var/tmp/$hdest
+    #
+    #--- Print on heps and delete
+    ssh heps lp -oduplex $argv[*] /var/tmp/$hdest \; rm -f /var/tmp/$hdest
+endif
+
+
+#--- Clean up if we created a local pdf file
+if ($psfile != "none") then
+    rm -f $psfile
+endif

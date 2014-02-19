@@ -1,0 +1,10 @@
+#! /bin/tcsh -f
+
+foreach f ($1) 
+   set f1 = `echo $f | sed "s/$2/$3/g" `
+   mv $f $f1
+end
+
+exit
+
+

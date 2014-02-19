@@ -1,0 +1,72 @@
+#!/bin/csh -f
+
+set host = "$argv[1]"
+set rem_user = $USER
+set rem_home = /home/$rem_user
+
+switch ("$host")
+case helen:
+case hep:
+case heps:
+case pollux:
+case castor:
+    set fullhost = ${host}.pha.jhu.edu
+    breaksw
+case njhu02:
+case njhu03:
+    set fullhost = njhu02.fnal.gov
+    breaksw
+case fcdflnx2:
+case fcdflnx3:
+case fcdflnx4:
+case fcdflnx5:
+case fcdflnx6:
+case fcdflnx7:
+case fcdflnx8:
+case fcdflnx9:
+    set fullhost = ${host}.fnal.gov
+    set rem_home = /cdf/home/$rem_user
+    breaksw
+case lxplus:
+    set fullhost = lxplus.cern.ch
+    set rem_home = /afs/cern.ch/user/p/$rem_user/public
+    breaksw
+case lxplus-other:
+    set fullhost = lxplus.cern.ch
+    set rem_home = /afs/cern.ch/user/p/$rem_user
+    breaksw
+case cmslpc:
+case cmslpc-sl5:
+    set fullhost = cmslpc-sl5.fnal.gov
+    set rem_home = /uscms/home/$rem_user
+    breaksw
+case cmsuaf:
+case uaf:
+    set fullhost = cmswn054.fnal.gov
+    set rem_home = /afs/fnal.gov/files/home/room2/$rem_user
+    breaksw
+case uscms:
+    set fullhost = cmswn054.fnal.gov
+    set rem_home = /uscms/home/$rem_user
+    breaksw
+case homepc:
+case krofna:
+    #set fullhost = 192.168.2.21
+    #set fullhost = 192.168.0.100
+    set fullhost = 192.168.1.9
+    breaksw
+case mybook:
+    set fullhost = 192.168.1.6
+    set rem_home = /shares/$rem_user
+    breaksw
+case tester:
+    set fullhost = tester.bph.jhu.edu
+    set rem_user = ana
+    set rem_home = /home/$rem_user
+    breaksw
+default:
+    set fullhost = "$host"
+    breaksw
+endsw 
+
+echo $fullhost $rem_home $rem_user

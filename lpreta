@@ -1,0 +1,52 @@
+#!/bin/csh -f
+
+if ($#argv == 0) then
+    echo "Usage: lprheps <filename>  <extra-switches-to-lp>"
+    exit 2
+endif
+
+set fname = $argv[1]
+shift argv
+
+
+#--- Convert to pdf if necessary
+set ext  = $fname:e
+set base = $fname:r
+set psfile = "none"
+if ($ext == "pdf") then
+    # run pdftops
+    # &&& To-do: test if pstopdf exists, otherwise try pdf2ps
+    #
+    set psfile = /var/tmp/${base}.ps
+    echo "Converting $fname to $psfile"
+    pdftops $fname $psfile
+    set fname = $psfile
+endif
+
+set h = `hostname`
+if ($h == "eta") then
+    @ weAreOnEta = 1
+else
+    @ weAreOnEta = 0
+endif
+
+if ($weAreOnEta) then
+    #--- Just print and exit
+    echo "Printing $fname"
+    lp -oduplex -dfourthlp $argv[*] $fname
+else
+    #--- Copy to eta
+    echo "Copying $fname to eta and printing it there"
+    set hdest = lpreta_$$
+    scp $fname eta:/var/tmp/$hdest
+    #
+    #--- Print on eta and delete
+    # ssh eta lp -oduplex $argv[*] /var/tmp/$hdest \; rm -f /var/tmp/$hdest
+    ssh eta lp -oduplex -dfourthlp $argv[*] /var/tmp/$hdest 
+endif
+
+
+#--- Clean up if we created a local pdf file
+if ($psfile != "none") then
+    rm -f $psfile
+endif

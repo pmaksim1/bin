@@ -1,0 +1,5 @@
+#!/bin/csh -f
+
+gxine --full-screen --video XShm $argv[*]
+
+

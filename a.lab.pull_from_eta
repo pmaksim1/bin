@@ -1,0 +1,2 @@
+#!/bin/csh -f
+rsync -avz --rsh=/usr/bin/ssh --rsync-path=/home/petar/etc/bin/rsync eta.pha.jhu.edu:/home/c173_308/public_html /home/petar/a.lab

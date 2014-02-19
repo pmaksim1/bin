@@ -1,0 +1,11 @@
+#!/bin/csh -f
+
+# Zvonko Bogdan - O tebi pevam najdrazi grade
+
+set targ = ` echo "$argv[*]" | sed 's/ /%20/g' `
+
+
+set cmd = "wget http://69.46.23.36/muzika/z/${targ}.mp3"
+echo $cmd
+eval $cmd
+

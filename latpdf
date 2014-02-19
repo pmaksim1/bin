@@ -1,0 +1,18 @@
+#!/bin/csh -f
+
+set name = $argv[1]
+pslatex ${name}.tex
+if ($status) exit
+
+#--- Run latex once again (now we know it will work)
+pslatex ${name}.tex
+
+#--- dvips -Ppdf produces funny characters for "fi" and "fl" unless
+#--- switch -G0 is present as well!
+#
+dvips -Ppdf -G0 -t letter ${name}.dvi -o ${name}.ps 
+
+#--- Convert to pdf, remove the postscript
+ps2pdf ${name}.ps ${name}.pdf
+rm -f ${name}.ps
+

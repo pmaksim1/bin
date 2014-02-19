@@ -1,0 +1,47 @@
+#!/bin/csh -f
+
+set loc_home = /home/petar
+set host = "$argv[1]"
+
+shift argv
+set orig_dir  = "$argv[1]"
+# e.g. a/b/c/d/e/f
+
+set dest_dir = `echo $orig_dir | awk -F/ '{for(i=1;i<NF;i=i+1) {printf("%s/",$i)}}'`
+# returns a/b/c/d/e/
+
+set rem_host_info = `pm.remote_host $host`
+set fullhost = `echo $rem_host_info | cut -d' ' -f1`
+set rem_home = `echo $rem_host_info | cut -d' ' -f2`
+set rem_user = `echo $rem_host_info | cut -d' ' -f3`
+
+
+#--- Parse some more switches to override 
+#--- rem_home or loc_home.
+shift argv
+if ($#argv) then
+    set rem_home = "$argv[1]"
+    shift argv
+endif
+
+if ($#argv) then
+    set loc_home = "$argv[1]"
+endif
+
+set rsync_exclude = "`printenv PM_RSYNC_EXCLUDE`"
+set rsync_extra_cmd = ""
+if ($#argv) then
+    # there are still more args, they all go to rsync;
+    # note we could pass --exclude statement here as well !
+    set rsync_extra_cmd = "$argv[*]"
+endif
+
+#if ( ! -d ${home}/${dest_dir} ) then
+#    mkdir -p ${home}/${dest_dir}
+#endif
+
+rsync -avz --rsh=/usr/bin/ssh --rsync-path=/usr/bin/rsync \
+    $rsync_exclude \
+    ${loc_home}/${orig_dir} \
+    ${rem_user}@${fullhost}:${rem_home}/${dest_dir} 
+

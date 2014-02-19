@@ -1,0 +1,5 @@
+#!/bin/csh -f
+rsync --delete -avz --rsh=/usr/bin/ssh \
+    --rsync-path=/home/petar/etc/bin/rsync \
+    /home/petar/jhu/c/171_105 \
+    eta.pha.jhu.edu:/home/www/htdocs/courses

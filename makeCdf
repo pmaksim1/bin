@@ -1,0 +1,50 @@
+#!/bin/csh -f 
+
+#setup cdfsoft2 development
+
+#cd ~/d
+
+ls -lF | grep /$
+
+if (x`printenv MAKECDF_PACKAGES` != x) then
+  set local_packages = "$MAKECDF_PACKAGES"
+else
+  set local_packages = `ls -lF|grep /$ |awk '{print $9}'|egrep -v '^bin|^doc|^include|^lib|^shlib|^man|^results|^tmp|^ups'|cut -d/ -f1`
+endif
+
+#gmake clean
+
+foreach p ($local_packages)
+   echo "Submitting gmake ${p}.nobin"
+   gmake ${p}.nobin >&! makeCdf.${p}.nobin.log &
+end
+
+echo "We wait for libs..."
+wait
+echo "All library jobs are done.  Now building binaries."
+
+set bin_packages = ""
+if (x`printenv MAKECDF_BIN` == xYES) then
+   set bin_packages = "$local_packages"
+endif
+
+if (x`printenv MAKECDF_BIN_PACKAGES` != x) then
+   set bin_packages = "$MAKECDF_BIN_PACKAGES"
+endif
+
+if ("x${bin_packages}" != "x") then
+   foreach pbin ($bin_packages)
+      echo "Submitting gmake $pbin"
+      gmake $pbin >&! makeCdf.${pbin}.log &
+   end
+
+   echo "We wait for bins..."
+   wait
+else
+   echo "Not making bins at this time."
+endif
+
+echo "Everything is done!"
+
+exit
+

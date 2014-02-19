@@ -1,0 +1,7 @@
+#!/bin/csh -f
+rsync -avz --rsh=/usr/bin/ssh --rsync-path=/usr/bin/rsync \
+    --exclude '*/jovan/*' \
+    /home/petar/hep/public_html \
+    petar@hep.pha.jhu.edu:/home/petar/
+
+

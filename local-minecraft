@@ -1,0 +1,2 @@
+#!/bin/csh -fv
+java -Xmx1024M -Xms512M -cp /home/petar/Downloads/minecraft/minecraft.jar net.minecraft.LauncherFrame

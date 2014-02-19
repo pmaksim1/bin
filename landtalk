@@ -1,0 +1,50 @@
+#!/bin/csh -f
+
+if ( $#argv == 0 ) then
+  echo "Need at least one arg: the name of the tex file of your talk.  Sorry."
+  exit 2
+else
+  set name = $argv[1]
+  shift argv
+endif
+
+#--- Figure out what we want.
+if ( ! -e talk.tex ) then
+  echo "You don't have talk.tex in the current directory, so I will"
+  echo "soft-link ~petar/a/doc/teh/talk_skeleton_land.tex to it."
+  ln -sf ~petar/a/doc/teh/talk_skeleton_land.tex talk.tex
+endif
+
+#--- Fullname must be in the path
+if ( "x`where fullname.csh`" != x ) then
+  set texname = `fullname.csh ${name} .tex`
+else
+  echo "You don't have fullname.csh, so I assume that the file is ${name}.tex"
+  set texname = ${name}.tex
+endif
+
+#--- Now we know what the name of the LaTeX source file is, so
+#--- let's make sure it's actually there.
+if ( ! -e ${texname} ) then
+  echo "File ${texname} does not exist in the current directory.  Sorry."
+  exit 2
+endif
+
+
+if ( -e talk_body.tex ) then
+  echo "Deleting old talk_body.tex"
+  /bin/rm talk_body.tex
+endif
+
+ln -sf ${texname} talk_body.tex
+
+latex talk.tex
+
+if ($status == 0) then
+  dvips -t letter talk.dvi -o ${name}.ps
+endif
+
+/bin/rm -f talk_body.tex
+
+#--- Hasta la vista, baby!
+exit

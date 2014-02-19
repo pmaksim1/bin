@@ -1,0 +1,104 @@
+#!/bin/csh -f
+
+if ( $#argv == 0 ) then
+  echo "Need at least one arg: the name of the tex file of your equation.  Sorry."
+  exit 2
+endif
+
+set name = $argv[1]
+shift argv
+
+set bold = 0
+set bext = ""
+set skel = "eq_skeleton"
+
+echo "name = $name"
+if ( "x${name}" == "x-b" ) then
+   echo "Found -b: switching to bold mode"
+   set bold = 1
+   set bext = "-bold"
+   set skel = "eq_skeleton_bold"
+   #
+   #--- In this case we need to seek yet another arg, as the name
+   if ( $#argv == 0 ) then
+      echo "Need another arg: the name of the tex file of your equation.  Sorry."
+      exit 2
+   endif
+   #
+   set name = $argv[1]
+   shift argv
+endif
+
+
+#--- Figure out what we want.
+if ( ! -e ${skel}.tex ) then
+  echo "You don't have ${skel}.tex in the current directory, so I will"
+  echo "soft-link ~petar/a/doc/teh/${skel}.tex to it."
+  ln -sf ~petar/a/doc/teh/${skel}.tex ${skel}.tex
+endif
+
+#--- Fullname must be in the path
+if ( "x`which fullname.csh`" != x ) then
+  set texname = `fullname.csh ${name} .tex`
+else
+  echo "You don't have fullname.csh, so I assume that the file is ${name}.tex"
+  set texname = ${name}.tex
+endif
+set name = $texname:r
+
+#--- Now we know what the name of the LaTeX source file is, so
+#--- let's make sure it's actually there.
+if ( ! -e ${texname} ) then
+  echo "File ${texname} does not exist in the current directory.  Sorry."
+  exit 2
+endif
+
+if ( -e equation_body.tex ) then
+  echo "Deleting old equation_body.tex"
+  /bin/rm equation_body.tex 
+endif
+
+#--- Link our file to equation_body.tex, since that's what the skeleton
+#--- file includes.
+ln -sf ${texname} equation_body.tex
+
+#--- Latex the skeleton.
+latex ${skel}.tex
+
+
+if ($status == 0) then
+  dvips -E ${skel}.dvi -o ${name}${bext}.eps
+  #pstoimg  -density 144  -transparent -type gif ${name}.eps -o ${name}.gif
+  pstoimg -density 288 -transparent -type gif ${name}${bext}.eps -o ${name}${bext}.gif
+  # try -aaliastext and -multipage
+endif
+
+/bin/rm -f equation_body.tex
+
+#--- Hasta la vista, baby!
+exit
+
+
+
+# Hi,
+# 
+# The options you specify increase dots-per-inch of the image and magnify
+# it at the same time. Is this what you really want?
+# 
+# A simple way is:
+#     convert -density 288 -geometry 25% myfig.ps myfig.gif
+# 
+# This samples the PS image at 288 dpi instead of 72, i.e. 4 times higher
+# resolution. Then by scaling the size down to 25% you retain the original
+# size and get 4 times better resolution. To speed up your image making you
+# could try:
+#     convert -density 144 -geometry 50% myfig.ps myfig.gif
+# 
+# For your specific purpose, i.e. showing PS files on web, JPEGs would be
+# more economic (.jpg instead of .gif) both in terms of size and time. The
+# convert program is definitely slower than pstopnm and ppmtogif,
+# irrespective of the fact that execution time on fcdfsgi2 can't directly be
+# compared with that on a P3 machine. If you are frequently converting PS
+# images to GIF on a large scale you may be better off with the latter two.
+# 
+# Satyajit

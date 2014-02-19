@@ -1,0 +1,6 @@
+#!/bin/tcsh -f
+
+set noglob
+echo "scp: $argv[*]"
+/home/petar/bin/real-scp -S/home/petar/bin/ssh $argv[*]
+
